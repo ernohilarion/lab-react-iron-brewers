@@ -1,14 +1,11 @@
-import { useState } from "react";
 import axios from "axios";
-import { Link, useNavigate } from "react-router-dom";
-const api_URL = "https://ih-beers-api2.herokuapp.com/beers/new"
+import { useEffect, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
+const api_URL = "https://ih-beers-api2.herokuapp.com"
 
+function EditBeerPage() {
 
-function AddBeerPage() {
-
-  const navigate = useNavigate()
-
-  const [beerData, setBeerData] = useState({
+  const [beerData, setbeerData] = useState({
     name: "",
     tagline: "",
     description: "",
@@ -17,20 +14,35 @@ function AddBeerPage() {
     brewersTips: "",
     attenuationLevel: 0,
     contributedBy: "",
-  });
+  })
 
+  useEffect(() => {
+    loadFormData()          // 1.- Primero se rellena el form con los datos a editar
+  }, [])
 
-  const handleInpuChange = e => {
-    const { name, value } = e.target
-    setBeerData({ ...beerData, [name]: value })
+  const { beerId } = useParams()
+
+  const navigate = useNavigate()
+
+  const loadFormData = () => {
+    axios
+      .get(`${api_URL}/beers/${beerId}`)
+      .then(({ data }) => setbeerData(data))    // 2.- Pre-rellenamos el estado (y con él, el formulario)
+      .catch(err => console.log(err))
   }
 
-  const handleFormSubmit = e => {
+  const handleInputChange = e => {
+    const { name, value } = e.target
+    setbeerData({ ...beerData, [name]: value })
+  }
+
+  const handleFormSubmit = e => {         // 3.- En el envío se mandan los datos a editar con .put()
+
     e.preventDefault()
 
     axios
-      .post(`${api_URL}`, beerData)
-      .then(() => navigate(`${api_URL}`))
+      .put(`${api_URL}/beers/new`, beerData)
+      .then(() => navigate(`/beers/${beerId}/edit`))
       .catch(err => console.log(err))
   }
 
@@ -47,7 +59,7 @@ function AddBeerPage() {
             name="name"
             placeholder="Beer Name"
             value={beerData.name}
-            onChange={handleInpuChange}
+            onChange={handleInputChange}
           />
           <label>Tagline</label>
           <input
@@ -56,7 +68,7 @@ function AddBeerPage() {
             name="tagline"
             placeholder="Beer Tagline"
             value={beerData.tagline}
-            onChange={handleInpuChange}
+            onChange={handleInputChange}
           />
 
           <label className="form-label">Description</label>
@@ -67,7 +79,7 @@ function AddBeerPage() {
             placeholder="Description"
             rows="3"
             value={beerData.description}
-            onChange={handleInpuChange}
+            onChange={handleInputChange}
           ></textarea>
 
           <label>Image</label>
@@ -77,7 +89,7 @@ function AddBeerPage() {
             name="imageUrl"
             placeholder="Image URL"
             value={beerData.imageUrl}
-            onChange={handleInpuChange}
+            onChange={handleInputChange}
           />
 
           <label>First Brewed</label>
@@ -87,7 +99,7 @@ function AddBeerPage() {
             name="firstBrewed"
             placeholder="Date - MM/YYYY"
             value={beerData.firstBrewed}
-            onChange={handleInpuChange}
+            onChange={handleInputChange}
           />
 
           <label>Brewer Tips</label>
@@ -97,7 +109,7 @@ function AddBeerPage() {
             name="brewersTips"
             placeholder="..."
             value={beerData.brewersTips}
-            onChange={handleInpuChange}
+            onChange={handleInputChange}
           />
 
           <label>Attenuation Level</label>
@@ -112,7 +124,7 @@ function AddBeerPage() {
               type="number"
               name="attenuationLevel"
               value={beerData.attenuationLevel}
-              onChange={handleInpuChange}
+              onChange={handleInputChange}
               min={0}
               max={100}
             />
@@ -125,15 +137,13 @@ function AddBeerPage() {
             name="contributedBy"
             placeholder="Contributed by"
             value={beerData.contributedBy}
-            onChange={handleInpuChange}
+            onChange={handleInputChange}
           />
-          <button className="btn btn-primary btn-round">Add Beer</button>
+          <button className="btn btn-primary btn-round">Edit Beer</button>
         </form>
       </div>
     </>
   );
 }
 
-export default AddBeerPage;
-
-
+export default EditBeerPage;
